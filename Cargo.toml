@@ -1,0 +1,6 @@
+[package]
+name = "algen"
+version = "0.1.0"
+authors = ["Florian Marending <marending.florian@gmail.com>"]
+
+[dependencies]
