@@ -8,8 +8,11 @@ use na::base;
 use na::UnitComplex;
 use na::geometry::Translation2;
 
+const HEIGHT: u32 = 800;
+const WIDTH: u32 = 800;
+
 fn main() {
-    let mut window = Window::new_with_size("Algen", 800, 800);
+    let mut window = Window::new_with_size("Algen", WIDTH, HEIGHT);
     window.set_background_color(1.0, 1.0, 1.0);
 
     let mut arena = Arena::new();
@@ -47,8 +50,8 @@ impl Arena {
 
         let mut agent = Agent::new(circle, line);
 
-        agent.set_pos((rand::random::<f32>() * window.height() as f32) - window.height() as f32 / 2.0,
-                      (rand::random::<f32>() * window.width() as f32) - window.width() as f32 / 2.0);
+        let x = rand::random::<f32>() * WIDTH as f32 - WIDTH as f32 / 2.0;
+        let y = rand::random::<f32>() * HEIGHT as f32 - HEIGHT as f32 / 2.0;
 
         agent.set_vel(0.0, 0.0);
         agent.set_rot(1.0);
