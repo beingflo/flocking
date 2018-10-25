@@ -53,7 +53,7 @@ impl Arena {
         let y = rand::random::<f32>() * HEIGHT as f32 - HEIGHT as f32 / 2.0;
 
         agent.set_pos(x, y);
-        agent.set_vel(0.0, 0.0);
+        agent.set_vel(0.0);
 
         let angle = rand::random::<f32>() * std::f32::consts::PI;
 
@@ -66,8 +66,7 @@ impl Arena {
 
     fn step(&mut self, dt: f32) {
         for a in &mut self.agents{
-            a.append_rot(dt);
-            a.transform();
+            a.step(dt);
         }
     }
 
@@ -76,7 +75,7 @@ impl Arena {
 
 struct Agent {
     pos: base::Vector2<f32>,
-    vel: base::Vector2<f32>,
+    vel: f32,
     rot: UnitComplex<f32>,
 
     circle: PlanarSceneNode,
@@ -85,7 +84,7 @@ struct Agent {
 
 impl Agent {
     fn new(circle: PlanarSceneNode, line: PlanarSceneNode) -> Self {
-        Agent { pos: base::Vector2::new(0.0, 0.0), vel: base::Vector2::new(0.0, 0.0), rot: UnitComplex::new(0.0), circle: circle, line: line }
+        Agent { pos: base::Vector2::new(0.0, 0.0), vel: 0.0, rot: UnitComplex::new(0.0), circle: circle, line: line }
     }
 
     fn set_pos(&mut self, x: f32, y: f32) {
@@ -93,9 +92,8 @@ impl Agent {
         self.pos.y = y;
     }
 
-    fn set_vel(&mut self, x: f32, y: f32) {
-        self.vel.x = x;
-        self.vel.y = y;
+    fn set_vel(&mut self, vel: f32) {
+        self.vel = vel;
     }
 
     fn set_rot(&mut self, rot: f32) {
@@ -108,7 +106,10 @@ impl Agent {
 
     // Agents can only move in the direction they're oriented in
     fn step(&mut self, dt: f32) {
-        self.pos += self.vel*dt;
+        // TODO FIX
+        //self.pos += self.vel*dt*self.rot;
+
+        self.transform();
     }
 
     fn transform(&mut self) {
