@@ -7,3 +7,4 @@ authors = ["Florian Marending <marending.florian@gmail.com>"]
 kiss3d="0.16.4"
 nalgebra="0.16.5"
 ncollide2d="0.17.1"
+rand="*"
