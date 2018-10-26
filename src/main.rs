@@ -77,19 +77,15 @@ impl Arena {
 
 }
 
-
-struct Agent {
+struct AgentProperty {
     pos: base::Vector2<f32>,
     vel: f32,
     rot: UnitComplex<f32>,
-
-    circle: PlanarSceneNode,
-    line: PlanarSceneNode,
 }
 
-impl Agent {
-    fn new(circle: PlanarSceneNode, line: PlanarSceneNode) -> Self {
-        Agent { pos: base::Vector2::new(0.0, 0.0), vel: 0.0, rot: UnitComplex::new(0.0), circle: circle, line: line }
+impl AgentProperty {
+    fn new() -> Self {
+        AgentProperty { pos: base::Vector2::new(0.0, 0.0), vel: 0.0, rot: UnitComplex::new(0.0) }
     }
 
     fn set_pos(&mut self, x: f32, y: f32) {
@@ -127,18 +123,46 @@ impl Agent {
         self.pos += self.vel*dt*base::Vector2::new(dir.unwrap().re, dir.unwrap().im);
 
         self.wrap_pos();
+    }
+}
 
+struct Agent {
+    prop: AgentProperty,
+
+    circle: PlanarSceneNode,
+    line: PlanarSceneNode,
+}
+
+impl Agent {
+    fn new(circle: PlanarSceneNode, line: PlanarSceneNode) -> Self {
+        Agent { prop: AgentProperty::new(), circle: circle, line: line }
+    }
+
+    fn step(&mut self, dt: f32) {
+        self.prop.step(dt);
         self.transform();
     }
 
+    fn set_pos(&mut self, x: f32, y: f32) {
+        self.prop.set_pos(x,y);
+    }
+
+    fn set_vel(&mut self, vel: f32) {
+        self.prop.set_vel(vel);
+    }
+
+    fn set_rot(&mut self, rot: f32) {
+        self.prop.set_rot(rot);
+    }
+
     fn transform(&mut self) {
-        self.circle.set_local_translation(Translation2::new(self.pos.x, self.pos.y));
+        self.circle.set_local_translation(Translation2::new(self.prop.pos.x, self.prop.pos.y));
 
         self.line.set_local_translation(Translation2::new(0.0, AGENT_LINE_LEN / 2.0));
         self.line.set_local_rotation(UnitComplex::new(0.0));
 
-        self.line.append_rotation(&self.rot);
-        self.line.append_translation(&Translation2::new(self.pos.x + 0.0, self.pos.y));
+        self.line.append_rotation(&self.prop.rot);
+        self.line.append_translation(&Translation2::new(self.prop.pos.x + 0.0, self.prop.pos.y));
 
     }
 }
