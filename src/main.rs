@@ -15,6 +15,9 @@ const AGENT_RADIUS: f32 = 5.0;
 const AGENT_LINE_LEN: f32 = 14.0;
 const AGENT_LINE_WIDTH: f32 = 2.0;
 
+const MAX_SPEED: f32 = 10.0;
+const MIN_SPEED: f32 = 5.0;
+
 fn main() {
     let mut window = Window::new_with_size("Algen", WIDTH, HEIGHT);
 
@@ -53,7 +56,9 @@ impl Arena {
         let y = rand::random::<f32>() * HEIGHT as f32 - HEIGHT as f32 / 2.0;
 
         agent.set_pos(x, y);
-        agent.set_vel(5.0);
+
+        let v = rand::random::<f32>() * (MAX_SPEED - MIN_SPEED) + MIN_SPEED;
+        agent.set_vel(v);
 
         let angle = rand::random::<f32>() * std::f32::consts::PI;
 
