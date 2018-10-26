@@ -51,11 +51,11 @@ impl Arena {
         self.agent_reprs.push(agent_repr);
     }
 
-    pub fn step(&mut self, dt: f32) {
+    pub fn step(&mut self, dt: f32, window: &mut Window) {
         let agents2 = self.agents.clone();
 
         for a in &mut self.agents {
-            a.update(&agents2);
+            a.update(&agents2, window);
         }
 
         for i in 0..self.agents.len() {

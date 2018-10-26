@@ -1,6 +1,8 @@
+use na;
 use na::base;
 use na::UnitComplex;
 use na::geometry::Translation2;
+use kiss3d::window::Window;
 use kiss3d::scene::PlanarSceneNode;
 
 use HEIGHT;
@@ -73,17 +75,37 @@ impl Agent {
         }
     }
 
-    fn distance_squared(&self, other: &Agent) -> f32 {
+    fn distance_squared(&self, other: &Agent) -> (f32, (f32, f32)) {
         let dist = (self.pos.x - other.pos.x).abs().powi(2) + (self.pos.y - other.pos.y).abs().powi(2);
         let dist_rquad = (self.pos.x - (other.pos.x + WIDTH as f32)).abs().powi(2) + (self.pos.y - other.pos.y).abs().powi(2);
         let dist_lquad = (self.pos.x - (other.pos.x - WIDTH as f32)).abs().powi(2) + (self.pos.y - other.pos.y).abs().powi(2);
         let dist_uquad = (self.pos.x - other.pos.x).abs().powi(2) + (self.pos.y - (other.pos.y + HEIGHT as f32)).abs().powi(2);
         let dist_dquad = (self.pos.x - other.pos.x).abs().powi(2) + (self.pos.y - (other.pos.y - HEIGHT as f32)).abs().powi(2);
 
-        dist.min(dist_rquad).min(dist_lquad).min(dist_uquad).min(dist_dquad)
+        let min = dist.min(dist_rquad).min(dist_lquad).min(dist_uquad).min(dist_dquad);
+        let min_pt = if dist == min {
+            (other.pos.x, other.pos.y)
+        } else if dist_rquad == min {
+            (other.pos.x + WIDTH as f32, other.pos.y)
+        } else if dist_lquad == min {
+            (other.pos.x - WIDTH as f32, other.pos.y)
+        } else if dist_uquad == min {
+            (other.pos.x, other.pos.y + HEIGHT as f32)
+        } else {
+            (other.pos.x, other.pos.y - HEIGHT as f32)
+        };
+
+        (min, min_pt)
     }
 
-    pub fn update(&mut self, neighbors: &[Agent]) {
+    pub fn update(&mut self, neighbors: &[Agent], window: &mut Window) {
+        for a in neighbors {
+            let (_, (x,y)) = self.distance_squared(a);
+            let pta = na::geometry::Point2::new(self.pos.x, self.pos.y);
+            let ptb = na::geometry::Point2::new(x, y);
+            let col = na::geometry::Point3::new(0.0, 0.0, 0.0);
+            window.draw_planar_line(&pta, &ptb, &col);
+        }
     }
 
     // Agents can only move in the direction they're oriented in
