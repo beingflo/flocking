@@ -32,6 +32,7 @@ impl AgentRepr {
     }
 }
 
+#[derive(Clone)]
 pub struct Agent {
     pos: base::Vector2<f32>,
     vel: f32,
@@ -70,6 +71,19 @@ impl Agent {
         if self.pos.y < -(HEIGHT as f32) / 2.0 {
             self.pos.y = HEIGHT as f32 / 2.0;
         }
+    }
+
+    fn distance_squared(&self, other: &Agent) -> f32 {
+        let dist = (self.pos.x - other.pos.x).abs().powi(2) + (self.pos.y - other.pos.y).abs().powi(2);
+        let dist_rquad = (self.pos.x - (other.pos.x + WIDTH as f32)).abs().powi(2) + (self.pos.y - other.pos.y).abs().powi(2);
+        let dist_lquad = (self.pos.x - (other.pos.x - WIDTH as f32)).abs().powi(2) + (self.pos.y - other.pos.y).abs().powi(2);
+        let dist_uquad = (self.pos.x - other.pos.x).abs().powi(2) + (self.pos.y - (other.pos.y + HEIGHT as f32)).abs().powi(2);
+        let dist_dquad = (self.pos.x - other.pos.x).abs().powi(2) + (self.pos.y - (other.pos.y - HEIGHT as f32)).abs().powi(2);
+
+        dist.min(dist_rquad).min(dist_lquad).min(dist_uquad).min(dist_dquad)
+    }
+
+    pub fn update(&mut self, neighbors: &[Agent]) {
     }
 
     // Agents can only move in the direction they're oriented in
