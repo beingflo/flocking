@@ -1,6 +1,8 @@
 use kiss3d::window::Window;
 
 use agent::Agent;
+use agent::AgentRepr;
+
 use agent::AGENT_RADIUS;
 use agent::AGENT_LINE_LEN;
 use agent::AGENT_LINE_WIDTH;
@@ -13,11 +15,12 @@ const MIN_SPEED: f32 = 5.0;
 
 pub struct Arena {
     agents: Vec<Agent>,
+    agent_reprs: Vec<AgentRepr>,
 }
 
 impl Arena {
     pub fn new() -> Self {
-        Arena { agents: Vec::new() }
+        Arena { agents: Vec::new(), agent_reprs: Vec::new() }
     }
 
     pub fn add_agent(&mut self, window: &mut Window) {
@@ -27,7 +30,8 @@ impl Arena {
         circle.set_color(0.0, 0.0, 0.0);
         line.set_color(0.0, 0.0, 0.0);
 
-        let mut agent = Agent::new(circle, line);
+        let mut agent_repr = AgentRepr::new(circle, line);
+        let mut agent = Agent::new();
 
         let x = rand::random::<f32>() * WIDTH as f32 - WIDTH as f32 / 2.0;
         let y = rand::random::<f32>() * HEIGHT as f32 - HEIGHT as f32 / 2.0;
@@ -41,14 +45,16 @@ impl Arena {
 
         agent.set_rot(angle);
 
-        agent.transform();
+        agent_repr.transform(&agent);
 
         self.agents.push(agent);
+        self.agent_reprs.push(agent_repr);
     }
 
     pub fn step(&mut self, dt: f32) {
-        for a in &mut self.agents{
-            a.step(dt);
+        for i in 0..self.agents.len() {
+            self.agents[i].step(dt);
+            self.agent_reprs[i].transform(&self.agents[i]);
         }
     }
 
