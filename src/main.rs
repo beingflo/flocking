@@ -25,7 +25,7 @@ fn main() {
 
     let mut arena = Arena::new();
 
-    for _ in 0..10 {
+    for _ in 0..20 {
         arena.add_agent(&mut window);
     }
 
@@ -105,10 +105,28 @@ impl Agent {
         self.rot = UnitComplex::new(rot);
     }
 
+    fn wrap_pos(&mut self) {
+        if self.pos.x > WIDTH as f32 / 2.0 {
+            self.pos.x = -(WIDTH as f32) / 2.0;
+        }
+        if self.pos.x < -(WIDTH as f32) / 2.0 {
+            self.pos.x = WIDTH as f32 / 2.0;
+        }
+
+        if self.pos.y > HEIGHT as f32 / 2.0 {
+            self.pos.y = -(HEIGHT as f32) / 2.0;
+        }
+        if self.pos.y < -(HEIGHT as f32) / 2.0 {
+            self.pos.y = HEIGHT as f32 / 2.0;
+        }
+    }
+
     // Agents can only move in the direction they're oriented in
     fn step(&mut self, dt: f32) {
         let dir = self.rot * UnitComplex::new(std::f32::consts::PI/2.0);
         self.pos += self.vel*dt*base::Vector2::new(dir.unwrap().re, dir.unwrap().im);
+
+        self.wrap_pos();
 
         self.transform();
     }
