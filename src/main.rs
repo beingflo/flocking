@@ -22,7 +22,7 @@ fn main() {
 
     let mut arena = Arena::new();
 
-    for i in 0..1000 {
+    for _ in 0..10 {
         arena.add_agent(&mut window);
     }
 
@@ -53,7 +53,7 @@ impl Arena {
         let y = rand::random::<f32>() * HEIGHT as f32 - HEIGHT as f32 / 2.0;
 
         agent.set_pos(x, y);
-        agent.set_vel(0.0);
+        agent.set_vel(5.0);
 
         let angle = rand::random::<f32>() * std::f32::consts::PI;
 
@@ -100,14 +100,10 @@ impl Agent {
         self.rot = UnitComplex::new(rot);
     }
 
-    fn append_rot(&mut self, rot: f32) {
-        self.rot = UnitComplex::new(self.rot.angle() + rot);
-    }
-
     // Agents can only move in the direction they're oriented in
     fn step(&mut self, dt: f32) {
-        // TODO FIX
-        //self.pos += self.vel*dt*self.rot;
+        let dir = self.rot * UnitComplex::new(std::f32::consts::PI/2.0);
+        self.pos += self.vel*dt*base::Vector2::new(dir.unwrap().re, dir.unwrap().im);
 
         self.transform();
     }
