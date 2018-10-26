@@ -1,12 +1,12 @@
 use kiss3d::window::Window;
 
 use agent::Agent;
+use agent::AGENT_RADIUS;
+use agent::AGENT_LINE_LEN;
+use agent::AGENT_LINE_WIDTH;
 
 use HEIGHT;
 use WIDTH;
-use AGENT_RADIUS;
-use AGENT_LINE_LEN;
-use AGENT_LINE_WIDTH;
 
 const MAX_SPEED: f32 = 10.0;
 const MIN_SPEED: f32 = 5.0;

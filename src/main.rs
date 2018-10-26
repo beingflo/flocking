@@ -6,15 +6,10 @@ mod agent;
 mod arena;
 
 use arena::Arena;
-
 use kiss3d::window::Window;
 
 const HEIGHT: u32 = 800;
 const WIDTH: u32 = 800;
-
-const AGENT_RADIUS: f32 = 5.0;
-const AGENT_LINE_LEN: f32 = 14.0;
-const AGENT_LINE_WIDTH: f32 = 2.0;
 
 fn main() {
     let mut window = Window::new_with_size("Algen", WIDTH, HEIGHT);

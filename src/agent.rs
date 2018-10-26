@@ -3,9 +3,12 @@ use na::UnitComplex;
 use na::geometry::Translation2;
 use kiss3d::scene::PlanarSceneNode;
 
-use AGENT_LINE_LEN;
 use HEIGHT;
 use WIDTH;
+
+pub const AGENT_RADIUS: f32 = 5.0;
+pub const AGENT_LINE_LEN: f32 = 14.0;
+pub const AGENT_LINE_WIDTH: f32 = 2.0;
 
 pub struct Agent {
     prop: AgentProperty,
