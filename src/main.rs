@@ -18,12 +18,12 @@ fn main() {
 
     let mut arena = Arena::new();
 
-    for _ in 0..100 {
+    for _ in 0..1000 {
         arena.add_agent(&mut window);
     }
 
     while window.render() {
-        arena.step(0.05, &mut window);
+        arena.step(0.1, &mut window);
     }
 }
 

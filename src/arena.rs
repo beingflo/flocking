@@ -16,11 +16,13 @@ const MIN_SPEED: f32 = 5.0;
 pub struct Arena {
     agents: Vec<Agent>,
     agent_reprs: Vec<AgentRepr>,
+
+    id_counter: u32,
 }
 
 impl Arena {
     pub fn new() -> Self {
-        Arena { agents: Vec::new(), agent_reprs: Vec::new() }
+        Arena { agents: Vec::new(), agent_reprs: Vec::new(), id_counter: 0 }
     }
 
     pub fn add_agent(&mut self, window: &mut Window) {
@@ -31,7 +33,8 @@ impl Arena {
         line.set_color(0.0, 0.0, 0.0);
 
         let mut agent_repr = AgentRepr::new(circle, line);
-        let mut agent = Agent::new();
+        let mut agent = Agent::new(self.id_counter);
+        self.id_counter += 1;
 
         let x = rand::random::<f32>() * WIDTH as f32 - WIDTH as f32 / 2.0;
         let y = rand::random::<f32>() * HEIGHT as f32 - HEIGHT as f32 / 2.0;
@@ -54,8 +57,16 @@ impl Arena {
     pub fn step(&mut self, dt: f32, window: &mut Window) {
         let agents2 = self.agents.clone();
 
+        for a in &mut self.agent_reprs {
+            a.set_color(0.0,0.0,0.0);
+        }
+
         for a in &mut self.agents {
-            a.update(&agents2, window);
+            if let Some(close) = a.update(&agents2, window) {
+                for &c in &close {
+                    self.agent_reprs[c].set_color(1.0, 0.0, 0.0);
+                }
+            }
         }
 
         for i in 0..self.agents.len() {
