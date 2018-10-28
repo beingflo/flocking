@@ -1,8 +1,5 @@
-use na::base;
-use na::UnitComplex;
-use na::geometry::Translation2;
-use kiss3d::window::Window;
-use kiss3d::scene::PlanarSceneNode;
+use nannou::prelude::*;
+use nannou::draw::Draw;
 
 use HEIGHT;
 use WIDTH;
@@ -11,44 +8,17 @@ pub const AGENT_RADIUS: f32 = 5.0;
 pub const AGENT_LINE_LEN: f32 = 14.0;
 pub const AGENT_LINE_WIDTH: f32 = 2.0;
 
-pub struct AgentRepr {
-    circle: PlanarSceneNode,
-    line: PlanarSceneNode,
-}
-
-impl AgentRepr {
-    pub fn new(circle: PlanarSceneNode, line: PlanarSceneNode) -> Self {
-        AgentRepr { circle: circle, line: line }
-    }
-
-    pub fn set_color(&mut self, r: f32, g: f32, b: f32) {
-        self.circle.set_color(r, g, b);
-        self.line.set_color(r, g, b);
-    }
-
-    pub fn transform(&mut self, data: &Agent) {
-        self.circle.set_local_translation(Translation2::new(data.pos.x, data.pos.y));
-
-        self.line.set_local_translation(Translation2::new(0.0, AGENT_LINE_LEN / 2.0));
-        self.line.set_local_rotation(UnitComplex::new(0.0));
-
-        self.line.append_rotation(&data.rot);
-        self.line.append_translation(&Translation2::new(data.pos.x + 0.0, data.pos.y));
-
-    }
-}
-
 #[derive(Clone)]
 pub struct Agent {
     id: u32,
-    pos: base::Vector2<f32>,
+    pos: Point2,
     vel: f32,
-    rot: UnitComplex<f32>,
+    dir: Vector2,
 }
 
 impl Agent {
     pub fn new(id: u32) -> Self {
-        Agent { id: id, pos: base::Vector2::new(0.0, 0.0), vel: 0.0, rot: UnitComplex::new(0.0) }
+        Agent { id: id, pos: Point2::new(0.0, 0.0), vel: 0.0, dir: Vector2::new(0.0, 1.0) }
     }
 
     pub fn set_pos(&mut self, x: f32, y: f32) {
@@ -60,8 +30,12 @@ impl Agent {
         self.vel = vel;
     }
 
-    pub fn set_rot(&mut self, rot: f32) {
-        self.rot = UnitComplex::new(rot);
+    pub fn set_dir(&mut self, dir: Vector2) {
+        self.dir = dir;
+    }
+
+    pub fn draw(&self, draw: &Draw) {
+        draw.ellipse().xy(self.pos).radius(AGENT_RADIUS).color(BLACK);
     }
 
     fn wrap_pos(&mut self) {
@@ -95,26 +69,9 @@ impl Agent {
 
     }
 
-    pub fn update(&mut self, neighbors: &[Agent], window: &mut Window) -> Option<Vec<usize>> {
-        if self.id != 0 {
-            return None;
-        }
-
-        let mut close = Vec::new();
-
-        for (i, a) in neighbors.iter().enumerate() {
-            if self.distance_squared(a) < 30000.0 {
-                close.push(i);
-            }
-        }
-
-        Some(close)
-    }
-
     // Agents can only move in the direction they're oriented in
     pub fn step(&mut self, dt: f32) {
-        let dir = self.rot * UnitComplex::new(std::f32::consts::PI/2.0);
-        self.pos += self.vel*dt*base::Vector2::new(dir.unwrap().re, dir.unwrap().im);
+        self.pos += self.dir*dt*self.vel;
 
         self.wrap_pos();
     }

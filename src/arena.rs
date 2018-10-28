@@ -1,7 +1,7 @@
-use kiss3d::window::Window;
+use nannou::prelude::*;
+use nannou::draw::Draw;
 
 use agent::Agent;
-use agent::AgentRepr;
 
 use agent::AGENT_RADIUS;
 use agent::AGENT_LINE_LEN;
@@ -15,63 +15,45 @@ const MIN_SPEED: f32 = 5.0;
 
 pub struct Arena {
     agents: Vec<Agent>,
-    agent_reprs: Vec<AgentRepr>,
 
     id_counter: u32,
 }
 
 impl Arena {
     pub fn new() -> Self {
-        Arena { agents: Vec::new(), agent_reprs: Vec::new(), id_counter: 0 }
+        Arena { agents: Vec::new(), id_counter: 0 }
     }
 
-    pub fn add_agent(&mut self, window: &mut Window) {
-        let mut circle = window.add_circle(AGENT_RADIUS);
-        let mut line = window.add_rectangle(AGENT_LINE_WIDTH , AGENT_LINE_LEN);
-
-        circle.set_color(0.0, 0.0, 0.0);
-        line.set_color(0.0, 0.0, 0.0);
-
-        let mut agent_repr = AgentRepr::new(circle, line);
+    pub fn add_agent(&mut self) {
         let mut agent = Agent::new(self.id_counter);
         self.id_counter += 1;
 
-        let x = rand::random::<f32>() * WIDTH as f32 - WIDTH as f32 / 2.0;
-        let y = rand::random::<f32>() * HEIGHT as f32 - HEIGHT as f32 / 2.0;
+        let x = random_f32() * WIDTH as f32 - WIDTH as f32 / 2.0;
+        let y = random_f32() * HEIGHT as f32 - HEIGHT as f32 / 2.0;
 
         agent.set_pos(x, y);
 
-        let v = rand::random::<f32>() * (MAX_SPEED - MIN_SPEED) + MIN_SPEED;
+        let v = random_f32() * (MAX_SPEED - MIN_SPEED) + MIN_SPEED;
         agent.set_vel(v);
 
-        let angle = rand::random::<f32>() * std::f32::consts::PI;
+        let direction = Vector2::new(random_f32()-0.5, random_f32()-0.5).normalize();
 
-        agent.set_rot(angle);
-
-        agent_repr.transform(&agent);
+        agent.set_dir(direction);
 
         self.agents.push(agent);
-        self.agent_reprs.push(agent_repr);
     }
 
-    pub fn step(&mut self, dt: f32, window: &mut Window) {
+    pub fn draw(&self, draw: &Draw) {
+        for a in &self.agents {
+            a.draw(draw);
+        }
+    }
+
+    pub fn step(&mut self, dt: f32) {
         let agents2 = self.agents.clone();
 
-        for a in &mut self.agent_reprs {
-            a.set_color(0.0,0.0,0.0);
-        }
-
         for a in &mut self.agents {
-            if let Some(close) = a.update(&agents2, window) {
-                for &c in &close {
-                    self.agent_reprs[c].set_color(1.0, 0.0, 0.0);
-                }
-            }
-        }
-
-        for i in 0..self.agents.len() {
-            self.agents[i].step(dt);
-            self.agent_reprs[i].transform(&self.agents[i]);
+            a.step(dt);
         }
     }
 
