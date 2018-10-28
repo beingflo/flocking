@@ -3,9 +3,6 @@ use nannou::draw::Draw;
 
 use agent::Agent;
 
-const MAX_SPEED: f32 = 50.0;
-const MIN_SPEED: f32 = 20.0;
-
 pub struct Arena {
     agents: Vec<Agent>,
 
@@ -26,6 +23,9 @@ impl Arena {
     }
 
     pub fn add_agent(&mut self) {
+        const MAX_SPEED: f32 = 50.0;
+        const MIN_SPEED: f32 = 20.0;
+
         let mut agent = Agent::new(self.id_counter);
         self.id_counter += 1;
 
