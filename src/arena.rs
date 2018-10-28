@@ -3,6 +3,8 @@ use nannou::draw::Draw;
 
 use agent::Agent;
 
+pub const MAX_SPEED: f32 = 50.0;
+
 pub struct Arena {
     agents: Vec<Agent>,
 
@@ -23,8 +25,6 @@ impl Arena {
     }
 
     pub fn add_agent(&mut self) {
-        const MAX_SPEED: f32 = 50.0;
-
         let mut agent = Agent::new(self.id_counter);
         self.id_counter += 1;
 
@@ -49,7 +49,7 @@ impl Arena {
         }
     }
 
-    pub fn update(&mut self, dt: f32) {
+    pub fn update(&mut self) {
         let agents_copy = self.agents.clone();
 
         for a in &mut self.agents {

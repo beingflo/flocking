@@ -45,7 +45,7 @@ fn event(_: &App, mut model: Model, event: Event) -> Model {
         Event::Update(update) => {
             let dt = update.since_last.secs() as f32;
 
-            model.arena.update(dt);
+            model.arena.update();
             model.arena.step(dt);
 
             model.ui_last_update += dt;

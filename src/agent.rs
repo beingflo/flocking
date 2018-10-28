@@ -1,6 +1,8 @@
 use nannou::prelude::*;
 use nannou::draw::Draw;
 
+use arena::MAX_SPEED;
+
 #[derive(Clone)]
 pub struct Agent {
     id: u32,
@@ -63,13 +65,19 @@ impl Agent {
     }
 
     pub fn update(&mut self, neighbors: &[Agent], width: f32, height: f32) {
-        let alignment_coeff = 0.01;
-        let separation_coeff = 0.1;
         let cohesion_coeff = 0.1;
+        let alignment_coeff = 0.1;
+        let separation_coeff = 0.1;
 
-        let mut av_vel = self.vel;
-        let mut av_push = Vector2::new(0.0, 0.0);
-        let mut av_pull = Vector2::new(0.0, 0.0);
+        let pull_radius = 2000.0;
+        let push_radius = 1000.0;
+
+        let mut pull = Vector2::new(0.0, 0.0);
+        let mut push = Vector2::new(0.0, 0.0);
+        let mut vel = Vector2::new(0.0, 0.0);
+
+        let mut num_pull = 1;
+        let mut num_push = 1;
 
         for n in neighbors {
             if n.id == self.id {
@@ -78,20 +86,35 @@ impl Agent {
 
             let dist = self.distance_squared(n, width, height);
 
-            if dist < 1_000.0 {
-                av_vel += n.vel;
-                av_push += self.pos - n.pos;
-                av_pull += n.pos - self.pos;
+            if dist < pull_radius {
+                pull += n.pos - self.pos;
+                num_pull += 1;
+
+                if dist < push_radius {
+                    push -= n.pos - self.pos;
+                    num_push += 1;
+                }
+
+                vel += n.vel;
             }
         }
 
-        let av_vel = av_vel.normalize() * alignment_coeff;
-        let av_push = av_push.normalize() * separation_coeff;
-        let av_pull = av_pull.normalize() * cohesion_coeff;
+        let pull = pull / (num_push as f32);
+        let pull = pull * cohesion_coeff;
 
-        //self.vel += av_vel;
-        //self.vel += av_push;
-        //self.vel += av_pull;
+        let push = push * separation_coeff;
+
+        let vel = vel / (num_pull as f32);
+        let vel = vel * alignment_coeff;
+
+        self.vel += pull;
+        self.vel = self.vel.limit_magnitude(MAX_SPEED);
+
+        self.vel += push;
+        self.vel = self.vel.limit_magnitude(MAX_SPEED);
+
+        self.vel += vel;
+        self.vel = self.vel.limit_magnitude(MAX_SPEED);
     }
 
     // Agents can only move in the direction they're oriented in
