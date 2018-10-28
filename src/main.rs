@@ -31,7 +31,7 @@ fn model(app: &App) -> Model {
 
     let mut arena = Arena::new(width, height);
 
-    for _ in 0..1000 {
+    for _ in 0..800 {
         arena.add_agent();
     }
 
@@ -44,6 +44,8 @@ fn event(_: &App, mut model: Model, event: Event) -> Model {
     match event {
         Event::Update(update) => {
             let dt = update.since_last.secs() as f32;
+
+            model.arena.update(dt);
             model.arena.step(dt);
 
             model.ui_last_update += dt;

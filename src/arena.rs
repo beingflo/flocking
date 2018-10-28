@@ -50,6 +50,15 @@ impl Arena {
         }
     }
 
+    pub fn update(&mut self, dt: f32) {
+        let agents_copy = self.agents.clone();
+
+        for a in &mut self.agents {
+            a.update(&agents_copy, self.width, self.height);
+        }
+    }
+
+
     pub fn step(&mut self, dt: f32) {
         for a in &mut self.agents {
             a.step(dt, self.width, self.height);

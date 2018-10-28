@@ -67,6 +67,41 @@ impl Agent {
 
     }
 
+    pub fn update(&mut self, neighbors: &[Agent], width: f32, height: f32) {
+        let alignment_coeff = 0.1;
+        let separation_coeff = 0.2;
+        let cohesion_coeff = 0.1;
+
+        let mut av_dir = self.dir;
+        let mut av_push = Vector2::new(0.0, 0.0);
+        let mut av_pull = Vector2::new(0.0, 0.0);
+
+        for n in neighbors {
+            if n.id == self.id {
+                continue;
+            }
+
+            let dist = self.distance_squared(n, width, height);
+            let inv_dist = 1.0 / dist;
+
+            if dist < 1_000.0 {
+                av_dir += n.dir;
+                av_push += (self.pos - n.pos) * inv_dist;
+                av_pull += (n.pos - self.pos) * inv_dist;
+            }
+        }
+
+        let av_dir = av_dir.normalize() * alignment_coeff;
+        let av_push = av_push.normalize() * separation_coeff;
+        let av_pull = av_pull.normalize() * cohesion_coeff;
+
+        self.dir += av_dir;
+        self.dir += av_push;
+        self.dir += av_pull;
+
+        self.dir = self.dir.normalize();
+    }
+
     // Agents can only move in the direction they're oriented in
     pub fn step(&mut self, dt: f32, width: f32, height: f32) {
         self.pos += self.dir*dt*self.vel;
