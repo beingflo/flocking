@@ -4,10 +4,6 @@ use nannou::draw::Draw;
 use HEIGHT;
 use WIDTH;
 
-pub const AGENT_RADIUS: f32 = 5.0;
-pub const AGENT_LINE_LEN: f32 = 14.0;
-pub const AGENT_LINE_WIDTH: f32 = 2.0;
-
 #[derive(Clone)]
 pub struct Agent {
     id: u32,
@@ -35,7 +31,12 @@ impl Agent {
     }
 
     pub fn draw(&self, draw: &Draw) {
-        draw.ellipse().xy(self.pos).radius(AGENT_RADIUS).color(BLACK);
+        const radius: f32 = 5.0;
+        const length: f32 = 12.0;
+        const width: f32 = 2.0;
+
+        draw.ellipse().xy(self.pos).radius(radius).color(BLACK);
+        draw.line().start(self.pos).end(self.pos + (self.dir * length)).thickness(width).caps_round().color(BLACK);
     }
 
     fn wrap_pos(&mut self) {

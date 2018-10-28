@@ -3,10 +3,6 @@ use nannou::draw::Draw;
 
 use agent::Agent;
 
-use agent::AGENT_RADIUS;
-use agent::AGENT_LINE_LEN;
-use agent::AGENT_LINE_WIDTH;
-
 use HEIGHT;
 use WIDTH;
 
