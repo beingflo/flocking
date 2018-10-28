@@ -1,9 +1,6 @@
 use nannou::prelude::*;
 use nannou::draw::Draw;
 
-use HEIGHT;
-use WIDTH;
-
 #[derive(Clone)]
 pub struct Agent {
     id: u32,
@@ -39,30 +36,30 @@ impl Agent {
         draw.line().start(self.pos).end(self.pos + (self.dir * length)).thickness(width).caps_round().color(BLACK);
     }
 
-    fn wrap_pos(&mut self) {
-        if self.pos.x > WIDTH as f32 / 2.0 {
-            self.pos.x = -(WIDTH as f32) / 2.0;
+    fn wrap_pos(&mut self, width: f32, height: f32) {
+        if self.pos.x > width / 2.0 {
+            self.pos.x = -width / 2.0;
         }
-        if self.pos.x < -(WIDTH as f32) / 2.0 {
-            self.pos.x = WIDTH as f32 / 2.0;
+        if self.pos.x < -width / 2.0 {
+            self.pos.x = width / 2.0;
         }
 
-        if self.pos.y > HEIGHT as f32 / 2.0 {
-            self.pos.y = -(HEIGHT as f32) / 2.0;
+        if self.pos.y > height / 2.0 {
+            self.pos.y = -height / 2.0;
         }
-        if self.pos.y < -(HEIGHT as f32) / 2.0 {
-            self.pos.y = HEIGHT as f32 / 2.0;
+        if self.pos.y < -height / 2.0 {
+            self.pos.y = height / 2.0;
         }
     }
 
-    fn distance_squared(&self, other: &Agent) -> f32 {
+    fn distance_squared(&self, other: &Agent, width: f32, height: f32) -> f32 {
         let x_dist_direct = (self.pos.x - other.pos.x).abs();
-        let x_dist_indirect = WIDTH as f32 - (self.pos.x - other.pos.x).abs();
+        let x_dist_indirect = width - (self.pos.x - other.pos.x).abs();
 
         let x_min = x_dist_direct.min(x_dist_indirect);
 
         let y_dist_direct = (self.pos.y - other.pos.y).abs();
-        let y_dist_indirect = HEIGHT as f32 - (self.pos.y - other.pos.y).abs();
+        let y_dist_indirect = height - (self.pos.y - other.pos.y).abs();
 
         let y_min = y_dist_direct.min(y_dist_indirect);
 
@@ -71,9 +68,9 @@ impl Agent {
     }
 
     // Agents can only move in the direction they're oriented in
-    pub fn step(&mut self, dt: f32) {
+    pub fn step(&mut self, dt: f32, width: f32, height: f32) {
         self.pos += self.dir*dt*self.vel;
 
-        self.wrap_pos();
+        self.wrap_pos(width, height);
     }
 }

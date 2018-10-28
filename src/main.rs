@@ -4,11 +4,9 @@ mod agent;
 mod arena;
 
 use nannou::prelude::*;
+use nannou::event::SimpleWindowEvent;
 
 use arena::Arena;
-
-const HEIGHT: u32 = 800;
-const WIDTH: u32 = 800;
 
 fn main() {
     nannou::app(model, event, view).run();
@@ -21,9 +19,11 @@ struct Model {
 fn model(app: &App) -> Model {
     let window = app.new_window().with_title("Algen").build().unwrap();
 
-    let mut arena = Arena::new();
+    let (width, height) = app.main_window().inner_size_points();
 
-    for _ in 0..10 {
+    let mut arena = Arena::new(width, height);
+
+    for _ in 0..100 {
         arena.add_agent();
     }
 
@@ -34,6 +34,9 @@ fn event(app: &App, mut model: Model, event: Event) -> Model {
     match event {
         Event::Update(update) => {
             model.arena.step(update.since_last.secs() as f32);
+        },
+        Event::WindowEvent { simple: Some(SimpleWindowEvent::Resized(size)), .. } => {
+            model.arena.update_size(size);
         },
         _ => (),
     }
