@@ -24,7 +24,6 @@ impl Arena {
 
     pub fn add_agent(&mut self) {
         const MAX_SPEED: f32 = 50.0;
-        const MIN_SPEED: f32 = 20.0;
 
         let mut agent = Agent::new(self.id_counter);
         self.id_counter += 1;
@@ -34,12 +33,12 @@ impl Arena {
 
         agent.set_pos(x, y);
 
-        let v = (random_f32() * (MAX_SPEED - MIN_SPEED)) + MIN_SPEED;
-        agent.set_vel(v);
+        let v_x = (random_f32() * MAX_SPEED) - (MAX_SPEED / 2.0);
+        let v_y = (random_f32() * MAX_SPEED) - (MAX_SPEED / 2.0);
 
-        let direction = Vector2::new(random_f32()-0.5, random_f32()-0.5).normalize();
+        let vel = Vector2::new(v_x, v_y);
 
-        agent.set_dir(direction);
+        agent.set_vel(vel);
 
         self.agents.push(agent);
     }
