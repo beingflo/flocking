@@ -4,8 +4,4 @@ version = "0.1.0"
 authors = ["Florian Marending <marending.florian@gmail.com>"]
 
 [dependencies]
-kiss3d="0.16.4"
 nannou="0.8.0"
-nalgebra="0.16.5"
-ncollide2d="0.17.1"
-rand="*"
