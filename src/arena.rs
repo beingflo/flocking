@@ -51,8 +51,6 @@ impl Arena {
     }
 
     pub fn step(&mut self, dt: f32) {
-        let agents2 = self.agents.clone();
-
         for a in &mut self.agents {
             a.step(dt, self.width, self.height);
         }

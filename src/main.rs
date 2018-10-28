@@ -17,7 +17,7 @@ struct Model {
 }
 
 fn model(app: &App) -> Model {
-    let window = app.new_window().with_title("Algen").build().unwrap();
+    let _ = app.new_window().with_title("Algen").build().unwrap();
 
     let (width, height) = app.main_window().inner_size_points();
 
@@ -30,7 +30,7 @@ fn model(app: &App) -> Model {
     Model { arena: arena }
 }
 
-fn event(app: &App, mut model: Model, event: Event) -> Model {
+fn event(_: &App, mut model: Model, event: Event) -> Model {
     match event {
         Event::Update(update) => {
             model.arena.step(update.since_last.secs() as f32);
