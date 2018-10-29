@@ -2,17 +2,19 @@ use nannou::prelude::*;
 use nannou::draw::Draw;
 
 use arena::MAX_SPEED;
+use arena::MAX_FORCE;
 
 #[derive(Clone)]
 pub struct Agent {
     id: u32,
     pos: Point2,
     vel: Vector2,
+    accel: Vector2,
 }
 
 impl Agent {
     pub fn new(id: u32) -> Self {
-        Agent { id: id, pos: Point2::new(0.0, 0.0), vel: Vector2::new(0.0, 1.0) }
+        Agent { id: id, pos: Point2::new(0.0, 0.0), vel: Vector2::new(0.0, 0.0), accel: Vector2::new(0.0, 0.0) }
     }
 
     pub fn set_pos(&mut self, x: f32, y: f32) {
@@ -24,13 +26,22 @@ impl Agent {
         self.vel = vel;
     }
 
+    pub fn set_accel(&mut self, accel: Vector2) {
+        self.accel = accel;
+    }
+
     pub fn draw(&self, draw: &Draw) {
         const RADIUS: f32 = 5.0;
         const LENGTH: f32 = 12.0;
         const WIDTH: f32 = 1.5;
 
-        draw.ellipse().xy(self.pos).radius(RADIUS).color(BLACK);
-        draw.line().start(self.pos).end(self.pos + (self.vel.normalize() * LENGTH)).thickness(WIDTH).caps_round().color(BLACK);
+        if self.id == 0 {
+            draw.ellipse().xy(self.pos).radius(RADIUS).color(RED);
+            draw.line().start(self.pos).end(self.pos + (self.vel.normalize() * LENGTH)).thickness(WIDTH).caps_round().color(RED);
+        } else {
+            draw.ellipse().xy(self.pos).radius(RADIUS).color(BLACK);
+            draw.line().start(self.pos).end(self.pos + (self.vel.normalize() * LENGTH)).thickness(WIDTH).caps_round().color(BLACK);
+        }
     }
 
     fn wrap_pos(&mut self, width: f32, height: f32) {
@@ -67,59 +78,48 @@ impl Agent {
     pub fn update(&mut self, neighbors: &[Agent], width: f32, height: f32) {
         let cohesion_coeff = 0.1;
         let alignment_coeff = 0.1;
-        let separation_coeff = 0.1;
+        let separation_coeff = 20.0;
 
-        let pull_radius = 2000.0;
-        let push_radius = 1000.0;
+        let desired_sep = 20.0;
+        let mut sep_steer = Vector2::new(0.0, 0.0);
+        let mut sep_count = 0;
 
-        let mut pull = Vector2::new(0.0, 0.0);
-        let mut push = Vector2::new(0.0, 0.0);
-        let mut vel = Vector2::new(0.0, 0.0);
-
-        let mut num_pull = 1;
-        let mut num_push = 1;
-
-        for n in neighbors {
-            if n.id == self.id {
+        for a in neighbors {
+            if a.id == self.id {
                 continue;
             }
 
-            let dist = self.distance_squared(n, width, height);
-
-            if dist < pull_radius {
-                pull += n.pos - self.pos;
-                num_pull += 1;
-
-                if dist < push_radius {
-                    push -= n.pos - self.pos;
-                    num_push += 1;
-                }
-
-                vel += n.vel;
+            let distance = self.distance_squared(a, width, height);
+            if distance < desired_sep * desired_sep {
+                let diff = (self.pos - a.pos).normalize();
+                let diff = diff / distance.sqrt();
+                sep_steer += diff;
+                sep_count += 1;
             }
         }
 
-        let pull = pull / (num_push as f32);
-        let pull = pull * cohesion_coeff;
+        if sep_count > 0 {
+            sep_steer /= sep_count as f32;
+        }
 
-        let push = push * separation_coeff;
-
-        let vel = vel / (num_pull as f32);
-        let vel = vel * alignment_coeff;
-
-        self.vel += pull;
-        self.vel = self.vel.limit_magnitude(MAX_SPEED);
-
-        self.vel += push;
-        self.vel = self.vel.limit_magnitude(MAX_SPEED);
-
-        self.vel += vel;
-        self.vel = self.vel.limit_magnitude(MAX_SPEED);
+        self.accel += sep_steer * separation_coeff;
     }
 
     // Agents can only move in the direction they're oriented in
     pub fn step(&mut self, dt: f32, width: f32, height: f32) {
+        self.accel = self.accel.limit_magnitude(MAX_FORCE);
+
+        self.vel += self.accel*dt;
+        self.vel = self.vel.limit_magnitude(MAX_SPEED);
+
         self.pos += self.vel*dt;
+
+        // Reset acceleration every step
+        //self.accel *= 0.0;
+
+        if self.id == 0 {
+            println!("{}", (self.accel.x*self.accel.x + self.accel.y*self.accel.y).sqrt());
+        }
 
         self.wrap_pos(width, height);
     }

@@ -4,6 +4,7 @@ use nannou::draw::Draw;
 use agent::Agent;
 
 pub const MAX_SPEED: f32 = 50.0;
+pub const MAX_FORCE: f32 = 100.0;
 
 pub struct Arena {
     agents: Vec<Agent>,
