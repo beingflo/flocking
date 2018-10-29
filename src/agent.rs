@@ -26,22 +26,13 @@ impl Agent {
         self.vel = vel;
     }
 
-    pub fn set_accel(&mut self, accel: Vector2) {
-        self.accel = accel;
-    }
-
     pub fn draw(&self, draw: &Draw) {
         const RADIUS: f32 = 5.0;
         const LENGTH: f32 = 12.0;
         const WIDTH: f32 = 1.5;
 
-        if self.id == 0 {
-            draw.ellipse().xy(self.pos).radius(RADIUS).color(RED);
-            draw.line().start(self.pos).end(self.pos + (self.vel.normalize() * LENGTH)).thickness(WIDTH).caps_round().color(RED);
-        } else {
-            draw.ellipse().xy(self.pos).radius(RADIUS).color(BLACK);
-            draw.line().start(self.pos).end(self.pos + (self.vel.normalize() * LENGTH)).thickness(WIDTH).caps_round().color(BLACK);
-        }
+        draw.ellipse().xy(self.pos).radius(RADIUS).color(BLACK);
+        draw.line().start(self.pos).end(self.pos + (self.vel.normalize() * LENGTH)).thickness(WIDTH).caps_round().color(BLACK);
     }
 
     fn wrap_pos(&mut self, width: f32, height: f32) {
@@ -76,13 +67,21 @@ impl Agent {
     }
 
     pub fn update(&mut self, neighbors: &[Agent], width: f32, height: f32) {
-        let cohesion_coeff = 0.1;
+        let cohesion_coeff = 0.5;
         let alignment_coeff = 0.1;
-        let separation_coeff = 20.0;
+        let separation_coeff = 50.0;
 
         let desired_sep = 20.0;
         let mut sep_steer = Vector2::new(0.0, 0.0);
         let mut sep_count = 0;
+
+        let align_neighborhood = 50.0;
+        let mut align_steer = Vector2::new(0.0, 0.0);
+        let mut align_count = 0;
+
+        let cohe_neighborhood = 200.0;
+        let mut cohe_steer = Vector2::new(0.0, 0.0);
+        let mut cohe_count = 0;
 
         for a in neighbors {
             if a.id == self.id {
@@ -92,17 +91,39 @@ impl Agent {
             let distance = self.distance_squared(a, width, height);
             if distance < desired_sep * desired_sep {
                 let diff = (self.pos - a.pos).normalize();
-                let diff = diff / distance.sqrt();
+                let diff = diff / (distance.sqrt().max(0.1));
                 sep_steer += diff;
                 sep_count += 1;
+            }
+
+            if distance < align_neighborhood * align_neighborhood {
+                align_steer += a.vel;
+                align_count += 1;
+            }
+
+            if distance < cohe_neighborhood * cohe_neighborhood {
+                cohe_steer += a.pos;
+                cohe_count += 1;
             }
         }
 
         if sep_count > 0 {
             sep_steer /= sep_count as f32;
+            self.accel += sep_steer * separation_coeff;
+            self.accel = self.accel.limit_magnitude(MAX_FORCE);
         }
 
-        self.accel += sep_steer * separation_coeff;
+        if align_count > 0 {
+            align_steer /= align_count as f32;
+            self.accel += align_steer * alignment_coeff;
+            self.accel = self.accel.limit_magnitude(MAX_FORCE);
+        }
+
+        if cohe_count > 0 {
+            cohe_steer /= cohe_count as f32;
+            self.accel += (cohe_steer - self.pos).normalize() * cohesion_coeff;
+            self.accel = self.accel.limit_magnitude(MAX_FORCE);
+        }
     }
 
     // Agents can only move in the direction they're oriented in
@@ -113,13 +134,6 @@ impl Agent {
         self.vel = self.vel.limit_magnitude(MAX_SPEED);
 
         self.pos += self.vel*dt;
-
-        // Reset acceleration every step
-        //self.accel *= 0.0;
-
-        if self.id == 0 {
-            println!("{}", (self.accel.x*self.accel.x + self.accel.y*self.accel.y).sqrt());
-        }
 
         self.wrap_pos(width, height);
     }

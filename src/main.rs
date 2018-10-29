@@ -31,7 +31,7 @@ fn model(app: &App) -> Model {
 
     let mut arena = Arena::new(width, height);
 
-    for _ in 0..800 {
+    for _ in 0..200 {
         arena.add_agent();
     }
 
