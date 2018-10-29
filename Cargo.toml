@@ -1,5 +1,5 @@
 [package]
-name = "algen"
+name = "flocking"
 version = "0.1.0"
 authors = ["Florian Marending <marending.florian@gmail.com>"]
 

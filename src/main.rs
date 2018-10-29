@@ -10,7 +10,7 @@ use nannou::event::SimpleWindowEvent;
 use arena::Arena;
 
 fn main() {
-    nannou::run(model, event, view);
+    nannou::app(model, event, view).run();
 }
 
 struct Model {
@@ -22,7 +22,7 @@ struct Model {
 }
 
 fn model(app: &App) -> Model {
-    //let _ = app.new_window().with_title("Algen").build().unwrap();
+    let _ = app.new_window().with_title("Flocking").build().unwrap();
     let mut ui = app.new_ui().build().unwrap();
 
     let (width, height) = app.main_window().inner_size_points();

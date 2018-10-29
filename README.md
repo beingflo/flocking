@@ -1,4 +1,4 @@
-# algen
+# flocking
 
 Boid flocking viewer
 
